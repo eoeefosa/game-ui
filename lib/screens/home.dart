@@ -8,13 +8,26 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-          child: ElevatedButton(
-        onPressed: () {
-          GoRouter.of(context).go('/levels');
-        },
-        child: const Text('Play'),
-      )),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          ElevatedButton(
+            onPressed: () {
+              throw Exception();
+              GoRouter.of(context).go('/levels');
+            },
+            child: const Text('Play Exception'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              throw StateError("Whoa!");
+              GoRouter.of(context).go('/levels');
+            },
+            child: const Text('Play'),
+          ),
+        ],
+      ),
     );
   }
 }

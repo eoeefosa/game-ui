@@ -29,7 +29,9 @@ Future<void> guardWithCrashlytics(
 
     if (crashlytics != null) {
       WidgetsFlutterBinding.ensureInitialized();
-      FlutterError.onError = crashlytics.recordFlutterError;
+      FlutterError.onError =
+          FirebaseCrashlytics.instance.recordFlutterFatalError;
+      // FlutterError.onError = crashlytics.recordFlutterError;
     }
     if (!kIsWeb) {
       Isolate.current.addErrorListener(RawReceivePort((dynamic pair) async {
