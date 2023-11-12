@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:simplegame/src/settings/persistence/settings_persistence.dart';
 
-class SettingsController {
+class SettingsController { 
   final SettingsPersistence _persistence;
 // TODO: CHANGE THIS TO TRUE BECOUSE WHEN IT IS MUTED SOUND AND MUSIC ARE FALSE
   ValueNotifier<bool> muted = ValueNotifier(false);

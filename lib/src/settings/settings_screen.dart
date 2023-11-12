@@ -19,7 +19,14 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         children: [
           _gap,
-          const Text("Settings"),
+          const Text(
+            "Settings",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 55,
+              height: 1,
+            ),
+          ),
           _gap,
           const _NameChangeLine('Name'),
           ValueListenableBuilder<bool>(
@@ -28,6 +35,14 @@ class SettingsScreen extends StatelessWidget {
               'Sound Fx',
               Icon(soundOn ? Icons.graphic_eq : Icons.volume_off),
               onSelected: () => settings.toggleSoundsOn(),
+            ),
+          ),
+          ValueListenableBuilder(
+            valueListenable: settings.musicOn,
+            builder: (context, musicOn, child) => _SettingsLine(
+              'Music',
+              Icon(musicOn ? Icons.music_note : Icons.music_off),
+              onSelected: () => settings.toggleMusicOn(),
             ),
           ),
           _gap,
