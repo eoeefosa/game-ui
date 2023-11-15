@@ -14,14 +14,14 @@ class Home extends StatelessWidget {
         children: [
           ElevatedButton(
             onPressed: () {
-              throw Exception();
+              // throw Exception();
               GoRouter.of(context).go('/levels');
             },
             child: const Text('Play Exception'),
           ),
           ElevatedButton(
             onPressed: () {
-              throw StateError("Whoa!");
+              // throw StateError("Whoa!");
               GoRouter.of(context).go('/levels');
             },
             child: const Text('Play'),

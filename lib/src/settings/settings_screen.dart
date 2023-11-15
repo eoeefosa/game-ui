@@ -5,6 +5,8 @@ import 'package:simplegame/src/settings/cutom_name_dialog.dart';
 import 'package:simplegame/src/settings/settings.dart';
 import 'package:simplegame/src/style/palette.dart';
 
+import '../player_progress/player_progress.dart';
+
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
@@ -44,6 +46,19 @@ class SettingsScreen extends StatelessWidget {
               Icon(musicOn ? Icons.music_note : Icons.music_off),
               onSelected: () => settings.toggleMusicOn(),
             ),
+          ),
+          _gap,
+          _SettingsLine(
+            "Reset progress",
+            const Icon(Icons.delete),
+            onSelected: () {
+              context.read<PlayerProgress>().reset();
+              final messegenger = ScaffoldMessenger.of(context);
+              messegenger.showSnackBar(
+                const SnackBar(
+                    content: Text("Player progress has been reset.")),
+              );
+            },
           ),
           _gap,
           ElevatedButton(
