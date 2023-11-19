@@ -42,7 +42,7 @@ class _CustomNameDialogState extends State<CustomNameDialog> {
               context.read<SettingsController>().setPlayerName(value);
             },
             onSubmitted: (value) {
-              // Player tappe 'submit or done on keybord
+              // Player tapped 'submit'/'Done' or done on keybord
               Navigator.pop(context);
             },
           ),

@@ -56,6 +56,7 @@ class SettingsScreen extends StatelessWidget {
               final messegenger = ScaffoldMessenger.of(context);
               messegenger.showSnackBar(
                 const SnackBar(
+                    backgroundColor: Colors.red,
                     content: Text("Player progress has been reset.")),
               );
             },

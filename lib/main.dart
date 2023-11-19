@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 // import 'package:simplegame/firebase_options.dart';
 import 'package:simplegame/routes.dart';
 import 'package:simplegame/src/app_lifecycle/app_lifecycle.dart';
+import 'package:simplegame/src/audio/audio_controller.dart';
 import 'package:simplegame/src/player_progress/persistence/local_storage_persistence.dart';
 import 'package:simplegame/src/player_progress/player_progress.dart';
 // import 'package:simplegame/src/carashlytics/crashlytics.dart';
@@ -74,10 +75,25 @@ class MyApp extends StatelessWidget {
             progress.getLatestFromStore();
             return progress;
           }),
+          // TODO GAMESERVICECONTROLLER
+          // TODO ADSCONTROLLER
+          // TODO INAPPURCHASE
           Provider<SettingsController>(
             create: (context) =>
                 SettingsController(persistence: settingsPersistence)
                   ..loadStateFromPersistence(),
+          ),
+          ProxyProvider2<SettingsController, ValueNotifier<AppLifecycleState>,
+              AudioController>(
+            lazy: false,
+            create: (context) => AudioController()..initialize(),
+            update: (context, settings, lifecycleNotifer, audio) {
+              if (audio == null) throw ArgumentError.notNull();
+              audio.attachSettings(settings);
+              audio.attachLifecycleNotifier(lifecycleNotifer);
+              return audio;
+            },
+            dispose: (context, audio) => audio.dispose(),
           ),
           Provider(
             create: (context) => Palette(),

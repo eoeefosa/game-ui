@@ -1,9 +1,6 @@
 import 'dart:collection';
-import 'dart:ffi';
 import 'dart:math';
-
 import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:simplegame/src/audio/songs.dart';
@@ -15,7 +12,7 @@ class AudioController {
   final AudioPlayer _musicPlayer;
   final List<AudioPlayer> _sfxPlayers;
 
-  final int _currentSfxPlayer = 0;
+  int _currentSfxPlayer = 0;
   final Queue<Song> _playlist;
 
   final Random _random = Random();
@@ -32,10 +29,11 @@ class AudioController {
             (i) => AudioPlayer(
                   playerId: 'sfxPlayer#$i',
                 )).toList(growable: false),
-        _playlist = Queue.of(List<Song>.of(songs)..shuffle(),) {
+        _playlist = Queue.of(
+          List<Song>.of(songs)..shuffle(),
+        ) {
     _musicPlayer.onPlayerStateChanged.listen(_changeSong);
   }
-
 
   void attachLifecycleNotifier(
       ValueNotifier<AppLifecycleState> lifecycleNotifier) {
@@ -48,11 +46,68 @@ class AudioController {
     _lifecycleNotifier = lifecycleNotifier;
   }
 
-  void attachSettings(SettingsController settingsController) {}
-  void dispose() {}
-  Future<void> initialize() async {}
-  void playSfx(SfxType type) {
+  void attachSettings(SettingsController settingsController) {
+    if (_settings == settingsController) {
+      return;
+    }
+    final oldSettings = _settings;
+    if (oldSettings != null) {
+      oldSettings.muted.removeListener(_mutedHandler);
+      oldSettings.musicOn.removeListener(_musicOnHandler);
+      oldSettings.soundsOn.removeListener(_soundOnHandler);
+    }
+    _settings = settingsController;
 
+    settingsController.muted.addListener(_mutedHandler);
+    settingsController.musicOn.addListener(_musicOnHandler);
+    settingsController.soundsOn.addListener(_soundOnHandler);
+// TODO: confirm this
+    if (!settingsController.musicOn.value && settingsController.muted.value) {
+      _startMusic();
+    }
+  }
+
+  void dispose() {
+    _lifecycleNotifier?.removeListener(_handleAppLifecycle);
+    _stopAllSound();
+    _musicPlayer.dispose();
+    for (final players in _sfxPlayers) {
+      players.dispose();
+    }
+  }
+
+  Future<void> initialize() async {
+    _log.info('Preloading sound effects');
+    // await _sfxPlayers.first.
+    // await _sfxCache
+    // .loadAll(SfxType.values.expand(soundTypeToFilename).toList());
+  }
+
+  void playSfx(SfxType type) {
+    final muted = _settings?.muted.value ?? true;
+    if (muted) {
+      _log.info(() => 'Ignoring playing sound($type) because audio is muted. ');
+      return;
+    }
+    final soundOn = _settings?.soundsOn.value ?? false;
+
+    if (!soundOn) {
+      _log.info(
+          () => 'Ignoring playing sound($type) because sounds are turned off.');
+      return;
+    }
+    final usedthisSfxPlayer = _sfxPlayers[_currentSfxPlayer];
+
+    _log.info(() => 'Playing sounds $type');
+    final options = soundTypeToFilename(type);
+    final filename = options[_random.nextInt(options.length)];
+    _log.info(() => '-Chosen filename:$filename');
+    usedthisSfxPlayer.play(AssetSource(filename),
+        volume: soundTypeToVolume(type));
+    _currentSfxPlayer = (_currentSfxPlayer + 1) % _sfxPlayers.length;
+    // TODO: CHECK THIS
+    print(_currentSfxPlayer);
+    // _sfxPlayers[_currentSfxPlayer];
   }
 
   void _changeSong(void _) {
