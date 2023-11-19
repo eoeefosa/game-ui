@@ -1,6 +1,6 @@
 import 'dart:collection';
 import 'dart:math';
-import 'package:audioplayers/audioplayers.dart' hide Logger;
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:simplegame/src/audio/songs.dart';
@@ -9,17 +9,6 @@ import 'package:simplegame/src/settings/settings.dart';
 
 class AudioController {
   static final _log = Logger('AudioController');
-  final AudioPlayer _musicPlayer;
-  final List<AudioPlayer> _sfxPlayers;
-
-  int _currentSfxPlayer = 0;
-  final Queue<Song> _playlist;
-
-  final Random _random = Random();
-
-  SettingsController? _settings;
-
-  ValueNotifier<AppLifecycleState>? _lifecycleNotifier;
 
   AudioController({int polyphony = 2})
       : assert(polyphony >= 1),
@@ -34,6 +23,26 @@ class AudioController {
         ) {
     _musicPlayer.onPlayerStateChanged.listen(_changeSong);
   }
+  void _changeSong(void _) {
+    _log.info('Last song finished playing.');
+    // Put the song that just finished playing to the end of the playlist.
+    _playlist.addLast(_playlist.removeFirst());
+    // Play the next song.
+    _log.info(() => 'Playing ${_playlist.first} now.');
+    _musicPlayer.play(AssetSource(_playlist.first.filename));
+  }
+
+  AudioPlayer _musicPlayer;
+  final List<AudioPlayer> _sfxPlayers;
+
+  int _currentSfxPlayer = 0;
+  final Queue<Song> _playlist;
+
+  final Random _random = Random();
+
+  SettingsController? _settings;
+
+  ValueNotifier<AppLifecycleState>? _lifecycleNotifier;
 
   void attachLifecycleNotifier(
       ValueNotifier<AppLifecycleState> lifecycleNotifier) {
@@ -62,7 +71,7 @@ class AudioController {
     settingsController.muted.addListener(_mutedHandler);
     settingsController.musicOn.addListener(_musicOnHandler);
     settingsController.soundsOn.addListener(_soundOnHandler);
-    
+
     if (!settingsController.muted.value && settingsController.musicOn.value) {
       _startMusic();
     }
@@ -77,6 +86,7 @@ class AudioController {
     }
   }
 
+// TODO: NO NEED OF THIS FUNCTION
   Future<void> initialize() async {
     _log.info('Preloading sound effects');
   }
@@ -108,15 +118,6 @@ class AudioController {
     // _sfxPlayers[_currentSfxPlayer];
   }
 
-  void _changeSong(void _) {
-    _log.info('Last song finished playing.');
-    // Put the song that just finished playing to the end of the playlist.
-    _playlist.addLast(_playlist.removeFirst());
-    // Play the next song.
-    _log.info(() => 'Playing ${_playlist.first} now.');
-    _musicPlayer.play(AssetSource(_playlist.first.filename));
-  }
-
   void _handleAppLifecycle() {
     switch (_lifecycleNotifier!.value) {
       case AppLifecycleState.paused:
@@ -136,8 +137,10 @@ class AudioController {
   }
 
   void _musicOnHandler() {
+    // if musicOn is true
     if (_settings!.musicOn.value) {
       // Music got turned on.
+      // if muted is false
       if (!_settings!.muted.value) {
         _resumeMusic();
       }
@@ -148,11 +151,13 @@ class AudioController {
   }
 
   void _mutedHandler() {
+    // muted true
     if (_settings!.muted.value) {
       // All sound just got muted.
       _stopAllSound();
     } else {
       // All sound just got un-muted.
+      // musicOn is true
       if (_settings!.musicOn.value) {
         _resumeMusic();
       }
@@ -167,6 +172,7 @@ class AudioController {
         try {
           await _musicPlayer.resume();
         } catch (e) {
+          // Sometimes, resuming fails with an "Unexpected" error.
           _log.severe(e);
           await _musicPlayer.play(AssetSource(_playlist.first.filename));
         }
@@ -190,6 +196,10 @@ class AudioController {
         await _musicPlayer.play(AssetSource(_playlist.first.filename));
         break;
       case PlayerState.disposed:
+        _log.info('Player is disposed. Reinitializing.');
+        _musicPlayer = AudioPlayer();
+        // You may need to set up the player again (e.g., set listeners, configuration) depending on your implementation.
+        await _musicPlayer.play(AssetSource(_playlist.first.filename));
         break;
     }
   }

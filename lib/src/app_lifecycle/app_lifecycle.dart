@@ -28,8 +28,6 @@ class _AppLifecycleObserverState extends State<AppLifecycleObserver>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _log.info(() => 'didChangeAppLifecycleState: $state');
     lifecycleListenable.value = state;
-    // TODO: why did he remove this didChangeAppLifecycleState
-    // super.didChangeAppLifecycleState(state);
   }
 
   @override

@@ -1,18 +1,20 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:simplegame/src/settings/persistence/settings_persistence.dart';
 
-class SettingsController { 
-  final SettingsPersistence _persistence;
-// TODO: CHANGE THIS TO TRUE BECOUSE WHEN IT IS MUTED SOUND AND MUSIC ARE FALSE
+class SettingsController {
+  /// Whether or not the sound is on at all. This overrides both music and sound.
   ValueNotifier<bool> muted = ValueNotifier(false);
   ValueNotifier<String> playerName = ValueNotifier('New Player');
   ValueNotifier<bool> soundsOn = ValueNotifier(false);
   ValueNotifier<bool> musicOn = ValueNotifier(false);
 
+  /// Creates a new instance of [SettingsController] backed by [persistence].
   SettingsController({required SettingsPersistence persistence})
       : _persistence = persistence;
 
+  final SettingsPersistence _persistence;
+
+  /// Asynchronously loads values from the injected persistence store.
   Future<void> loadStateFromPersistence() async {
     await Future.wait([
       // if its web getmuted is false

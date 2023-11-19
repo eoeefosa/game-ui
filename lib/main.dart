@@ -64,7 +64,8 @@ class MyApp extends StatelessWidget {
   final SettingsPersistence settingsPersistence =
       LocalStorageSettingsPersistence();
   final playerProgressPersistence = LocalStoragePlayerProgressPersistence();
-  AdsController? adsController;
+  // TODO: Can initalize it later
+  final AdsController? adsController = null;
   @override
   Widget build(BuildContext context) {
     return AppLifecycleObserver(
