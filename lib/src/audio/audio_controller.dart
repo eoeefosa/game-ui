@@ -1,6 +1,6 @@
 import 'dart:collection';
 import 'dart:math';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:audioplayers/audioplayers.dart' hide Logger;
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:simplegame/src/audio/songs.dart';
@@ -42,7 +42,7 @@ class AudioController {
 
     // Add a new ValueNotifier<AppLifecycleState>
     lifecycleNotifier.addListener(_handleAppLifecycle);
-    //
+    //dispose of the previous lifecyleNotifier
     _lifecycleNotifier = lifecycleNotifier;
   }
 
@@ -51,6 +51,7 @@ class AudioController {
       return;
     }
     final oldSettings = _settings;
+    // Remove handlers from the old settings controller if present
     if (oldSettings != null) {
       oldSettings.muted.removeListener(_mutedHandler);
       oldSettings.musicOn.removeListener(_musicOnHandler);
@@ -61,8 +62,8 @@ class AudioController {
     settingsController.muted.addListener(_mutedHandler);
     settingsController.musicOn.addListener(_musicOnHandler);
     settingsController.soundsOn.addListener(_soundOnHandler);
-// TODO: confirm this
-    if (!settingsController.musicOn.value && settingsController.muted.value) {
+    
+    if (!settingsController.muted.value && settingsController.musicOn.value) {
       _startMusic();
     }
   }
@@ -78,9 +79,6 @@ class AudioController {
 
   Future<void> initialize() async {
     _log.info('Preloading sound effects');
-    // await _sfxPlayers.first.
-    // await _sfxCache
-    // .loadAll(SfxType.values.expand(soundTypeToFilename).toList());
   }
 
   void playSfx(SfxType type) {
@@ -101,7 +99,7 @@ class AudioController {
     _log.info(() => 'Playing sounds $type');
     final options = soundTypeToFilename(type);
     final filename = options[_random.nextInt(options.length)];
-    _log.info(() => '-Chosen filename:$filename');
+    _log.info(() => '- Chosen filename:$filename');
     usedthisSfxPlayer.play(AssetSource(filename),
         volume: soundTypeToVolume(type));
     _currentSfxPlayer = (_currentSfxPlayer + 1) % _sfxPlayers.length;
@@ -112,7 +110,9 @@ class AudioController {
 
   void _changeSong(void _) {
     _log.info('Last song finished playing.');
+    // Put the song that just finished playing to the end of the playlist.
     _playlist.addLast(_playlist.removeFirst());
+    // Play the next song.
     _log.info(() => 'Playing ${_playlist.first} now.');
     _musicPlayer.play(AssetSource(_playlist.first.filename));
   }

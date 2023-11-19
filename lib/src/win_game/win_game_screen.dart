@@ -13,6 +13,7 @@ class WinGameScreen extends StatelessWidget {
   });
   final Score score;
   static const route = '/play/won';
+  static const routename = 'won';
 
   @override
   Widget build(BuildContext context) {

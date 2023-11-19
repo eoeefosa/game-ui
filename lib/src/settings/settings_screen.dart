@@ -10,6 +10,7 @@ import '../player_progress/player_progress.dart';
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
   static const route = '/settings';
+  static const routename = 'settings';
 
   static const _gap = SizedBox(height: 60);
 
