@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 // import 'package:simplegame/firebase_options.dart';
 import 'package:simplegame/routes.dart';
+import 'package:simplegame/src/ads/ad_controller.dart';
 import 'package:simplegame/src/app_lifecycle/app_lifecycle.dart';
 import 'package:simplegame/src/audio/audio_controller.dart';
 import 'package:simplegame/src/player_progress/persistence/local_storage_persistence.dart';
@@ -63,7 +64,7 @@ class MyApp extends StatelessWidget {
   final SettingsPersistence settingsPersistence =
       LocalStorageSettingsPersistence();
   final playerProgressPersistence = LocalStoragePlayerProgressPersistence();
-
+  AdsController? adsController;
   @override
   Widget build(BuildContext context) {
     return AppLifecycleObserver(
@@ -77,6 +78,7 @@ class MyApp extends StatelessWidget {
           }),
           // TODO GAMESERVICECONTROLLER
           // TODO ADSCONTROLLER
+          Provider<AdsController?>.value(value: adsController),
           // TODO INAPPURCHASE
           Provider<SettingsController>(
             create: (context) =>
