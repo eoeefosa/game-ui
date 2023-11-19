@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+/// An extremely silly example of a game state.
+///
+/// Tracks only a single variable, [progress], and calls [onWin] when
+/// the value of [progress] reaches [goal].
 class LevelState extends ChangeNotifier {
   LevelState({required this.onWin, this.goal = 100});
 

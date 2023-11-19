@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:simplegame/screens/home.dart';
 import 'package:simplegame/screens/levels.dart';
 import 'package:simplegame/src/main_menu/main_menu_screen.dart';
 import 'package:simplegame/src/settings/settings_screen.dart';

@@ -50,6 +50,7 @@ class MainMenuScreen extends StatelessWidget {
             ),
             _gap,
             // TODO: ACHIEVEMNETS,AND LEADERBOARD
+
             // _gap,
             ElevatedButton(
               onPressed: () => GoRouter.of(context).go(SettingsScreen.route),
@@ -75,5 +76,19 @@ class MainMenuScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _hideUntilReady({required Widget child, required Future<bool> ready}) {
+    return FutureBuilder<bool>(
+        future: ready,
+        builder: (context, snapshot) {
+          return Visibility(
+            visible: snapshot.data ?? false,
+            maintainSize: true,
+            maintainState: true,
+            maintainAnimation: true,
+            child: child,
+          );
+        });
   }
 }

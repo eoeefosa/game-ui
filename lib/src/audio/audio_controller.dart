@@ -21,10 +21,12 @@ class AudioController {
         _playlist = Queue.of(
           List<Song>.of(songs)..shuffle(),
         ) {
-    _musicPlayer.onPlayerStateChanged.listen(_changeSong);
+          // onPlayerCompletion replaced by onPlayercomplete
+    _musicPlayer.onPlayerComplete.listen(_changeSong);
   }
   void _changeSong(void _) {
-    _log.info('Last song finished playing.');
+    print("changesong from audio player called");
+        _log.info('Last song finished playing.');
     // Put the song that just finished playing to the end of the playlist.
     _playlist.addLast(_playlist.removeFirst());
     // Play the next song.
