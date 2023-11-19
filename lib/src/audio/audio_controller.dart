@@ -1,7 +1,8 @@
 import 'dart:collection';
 import 'dart:math';
-import 'package:audioplayers/audioplayers.dart' hide Logger;
+// import 'package:audioplayers/audioplayers.dart' hide Logger;
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:logging/logging.dart';
 import 'package:simplegame/src/audio/songs.dart';
 import 'package:simplegame/src/audio/sounds.dart';
@@ -9,10 +10,13 @@ import 'package:simplegame/src/settings/settings.dart';
 
 class AudioController {
   static final _log = Logger('AudioController');
-  final AudioPlayer _musicPlayer;
+
+  late final AudioPlayer _musicPlayer;
+  late AudioPlayer _sfxPlayer;
+
   final List<AudioPlayer> _sfxPlayers;
 
-  int _currentSfxPlayer = 0;
+  final int _currentSfxPlayer = 0;
   final Queue<Song> _playlist;
 
   final Random _random = Random();
@@ -23,16 +27,19 @@ class AudioController {
 
   AudioController({int polyphony = 2})
       : assert(polyphony >= 1),
-        _musicPlayer = AudioPlayer(playerId: 'musicPlayer'),
-        _sfxPlayers = Iterable.generate(
-            polyphony,
-            (i) => AudioPlayer(
-                  playerId: 'sfxPlayer#$i',
-                )).toList(growable: false),
+        _musicPlayer = AudioPlayer(),
+        _sfxPlayers = Iterable.generate(polyphony, (i) => AudioPlayer())
+            .toList(growable: false),
         _playlist = Queue.of(
           List<Song>.of(songs)..shuffle(),
         ) {
-    _musicPlayer.onPlayerStateChanged.listen(_changeSong);
+    _initializePlayers();
+    _musicPlayer.playerStateStream.listen(_changeSong);
+  }
+  void _initializePlayers() {
+    _musicPlayer.setUrl(_playlist.first.filename, preload: true);
+
+    _sfxPlayer = _sfxPlayers.first;
   }
 
   void attachLifecycleNotifier(
@@ -62,18 +69,18 @@ class AudioController {
     settingsController.muted.addListener(_mutedHandler);
     settingsController.musicOn.addListener(_musicOnHandler);
     settingsController.soundsOn.addListener(_soundOnHandler);
-    
+
     if (!settingsController.muted.value && settingsController.musicOn.value) {
       _startMusic();
     }
   }
 
-  void dispose() {
+  void dispose() async {
     _lifecycleNotifier?.removeListener(_handleAppLifecycle);
     _stopAllSound();
-    _musicPlayer.dispose();
+    await _musicPlayer.dispose();
     for (final players in _sfxPlayers) {
-      players.dispose();
+      await players.dispose();
     }
   }
 
@@ -81,7 +88,7 @@ class AudioController {
     _log.info('Preloading sound effects');
   }
 
-  void playSfx(SfxType type) {
+  void playSfx(SfxType type) async {
     final muted = _settings?.muted.value ?? true;
     if (muted) {
       _log.info(() => 'Ignoring playing sound($type) because audio is muted. ');
@@ -94,27 +101,22 @@ class AudioController {
           () => 'Ignoring playing sound($type) because sounds are turned off.');
       return;
     }
-    final usedthisSfxPlayer = _sfxPlayers[_currentSfxPlayer];
 
-    _log.info(() => 'Playing sounds $type');
+    _log.info(() => 'Playing sound: $type');
     final options = soundTypeToFilename(type);
     final filename = options[_random.nextInt(options.length)];
-    _log.info(() => '- Chosen filename:$filename');
-    usedthisSfxPlayer.play(AssetSource(filename),
-        volume: soundTypeToVolume(type));
-    _currentSfxPlayer = (_currentSfxPlayer + 1) % _sfxPlayers.length;
-    // TODO: CHECK THIS
-    print(_currentSfxPlayer);
-    // _sfxPlayers[_currentSfxPlayer];
+    _log.info(() => '- Chosen filename: $filename');
+    await _sfxPlayer.setUrl(filename);
+    _sfxPlayer.play();
   }
 
-  void _changeSong(void _) {
+  void _changeSong(void _) async {
     _log.info('Last song finished playing.');
     // Put the song that just finished playing to the end of the playlist.
     _playlist.addLast(_playlist.removeFirst());
     // Play the next song.
     _log.info(() => 'Playing ${_playlist.first} now.');
-    _musicPlayer.play(AssetSource(_playlist.first.filename));
+    await _musicPlayer.setUrl(_playlist.first.filename);
   }
 
   void _handleAppLifecycle() {
@@ -161,42 +163,54 @@ class AudioController {
 
   Future<void> _resumeMusic() async {
     _log.info("Resuming music");
-    switch (_musicPlayer.state) {
-      case PlayerState.paused:
-        _log.info('Calling _musicPlayer.resume()');
-        try {
-          await _musicPlayer.resume();
-        } catch (e) {
-          _log.severe(e);
-          await _musicPlayer.play(AssetSource(_playlist.first.filename));
-        }
-        break;
-      case PlayerState.stopped:
-        _log.info("resumeMusic() called when music is stopped. "
-            "This probably means we haven't yet started the music. "
-            "For example, the game was started with sound off.");
-        await _musicPlayer.play(AssetSource(_playlist.first.filename));
+    switch (_musicPlayer.playerState.playing) {
+      // case PlayerState.paused:
+      //   _log.info('Calling _musicPlayer.resume()');
+      //   try {
+      //     await _musicPlayer.resume();
+      //   } catch (e) {
+      //     _log.severe(e);
+      //     await _musicPlayer.play(AssetSource(_playlist.first.filename));
+      //   }
+      //   break;
+      // case PlayerState.stopped:
+      //   _log.info("resumeMusic() called when music is stopped. "
+      //       "This probably means we haven't yet started the music. "
+      //       "For example, the game was started with sound off.");
+      //   await _musicPlayer.play(AssetSource(_playlist.first.filename));
 
-        break;
-      case PlayerState.playing:
+      //   break;
+      // case PlayerState.playing:
+      //   _log.warning('resumeMusic() called when music is playing. '
+      //       'Nothing to do.');
+      //   break;
+
+      // case PlayerState.completed:
+      //   _log.warning('resumeMusic() called when music is completed. '
+      //       "Music should never be 'completed' as it's either not playing "
+      //       "or looping forever.");
+      //   await _musicPlayer.play(AssetSource(_playlist.first.filename));
+      //   break;
+      // case PlayerState.disposed:
+      //   break;
+      case true:
         _log.warning('resumeMusic() called when music is playing. '
             'Nothing to do.');
+        // _musicPlayer.play();
         break;
-
-      case PlayerState.completed:
+      case false:
         _log.warning('resumeMusic() called when music is completed. '
             "Music should never be 'completed' as it's either not playing "
             "or looping forever.");
-        await _musicPlayer.play(AssetSource(_playlist.first.filename));
-        break;
-      case PlayerState.disposed:
+        await _musicPlayer.setUrl(_playlist.first.filename);
+        _musicPlayer.play();
         break;
     }
   }
 
   void _soundOnHandler() {
     for (final player in _sfxPlayers) {
-      if (player.state == PlayerState.playing) {
+      if (player.playerState.playing) {
         player.stop();
       }
     }
@@ -204,22 +218,23 @@ class AudioController {
 
   void _startMusic() {
     _log.info('starting music');
-    _musicPlayer.play(AssetSource(_playlist.first.filename));
+    // _musicPlayer.play(_playlist.first.filename);
+    _musicPlayer.play();
   }
 
-  void _stopAllSound() {
-    if (_musicPlayer.state == PlayerState.playing) {
-      _musicPlayer.pause();
+  void _stopAllSound() async {
+    if (_musicPlayer.playerState.playing) {
+      await _musicPlayer.pause();
     }
     for (final player in _sfxPlayers) {
       player.stop();
     }
   }
 
-  void _stopMusic() {
+  void _stopMusic() async {
     _log.info('Stopping music');
-    if (_musicPlayer.state == PlayerState.playing) {
-      _musicPlayer.pause();
+    if (_musicPlayer.playerState.playing) {
+      await _musicPlayer.pause();
     }
   }
 }
