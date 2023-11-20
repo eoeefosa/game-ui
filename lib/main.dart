@@ -8,6 +8,8 @@ import 'package:simplegame/routes.dart';
 import 'package:simplegame/src/ads/ad_controller.dart';
 import 'package:simplegame/src/app_lifecycle/app_lifecycle.dart';
 import 'package:simplegame/src/audio/audio_controller.dart';
+import 'package:simplegame/src/games_services/game_services_controller.dart';
+import 'package:simplegame/src/games_services/persistence/sharepref_impl.dart';
 import 'package:simplegame/src/player_progress/persistence/local_storage_persistence.dart';
 import 'package:simplegame/src/player_progress/player_progress.dart';
 // import 'package:simplegame/src/carashlytics/crashlytics.dart';
@@ -66,6 +68,8 @@ class MyApp extends StatelessWidget {
   final playerProgressPersistence = LocalStoragePlayerProgressPersistence();
   // TODO: Can initalize it later
   final AdsController? adsController = null;
+  final SharedPrefGamesServicesControllerImpl gamesServicesControllerImpl =
+      SharedPrefGamesServicesControllerImpl();
   @override
   Widget build(BuildContext context) {
     return AppLifecycleObserver(
@@ -77,7 +81,11 @@ class MyApp extends StatelessWidget {
             progress.getLatestFromStore();
             return progress;
           }),
-          // TODO GAMESERVICECONTROLLER
+          Provider<GameServicesController?>(
+              create: (context) => GameServicesController(
+                  gamesServiceController:
+                      SharedPrefGamesServicesControllerImpl())),
+          // Provider<GameServicesController?>.value(value: SharedPrefGamesServicesControllerImpl),
           // TODO ADSCONTROLLER
           Provider<AdsController?>.value(value: adsController),
           // TODO INAPPURCHASE

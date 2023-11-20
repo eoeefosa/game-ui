@@ -2,19 +2,22 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../score.dart';
 import 'abstractgameservice.dart';
 
-class GamesServicesControllerImpl extends AbstractGameService {
+class SharedPrefGamesServicesControllerImpl extends AbstractGameService {
   static final Logger _log = Logger('GamesServiesController');
   final Completer<bool> _signedInCompleter = Completer();
+  
+  @override
   Future<bool> get signedIn => _signedInCompleter.future;
 
   SharedPreferences? _prefs;
+  String? _iOS;
+  String? _android;
 
   Future<void> _initPrefs() async {
-    if (_prefs == null) {
-      _prefs = await SharedPreferences.getInstance();
-    }
+    _prefs ??= await SharedPreferences.getInstance();
   }
 
   @override
@@ -22,6 +25,8 @@ class GamesServicesControllerImpl extends AbstractGameService {
     required String iOS,
     required String android,
   }) async {
+    _iOS = iOS;
+    _android = _android;
     if (!await signedIn) {
       _log.warning("Trying to award achievement when not logged in.");
       return;
@@ -37,7 +42,7 @@ class GamesServicesControllerImpl extends AbstractGameService {
   Future<void> initialize() async {
     try {
       // Simulate signing in
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(const Duration(seconds: 2));
 
       // Update signedIn status in SharedPreferences
       await _initPrefs();
@@ -59,8 +64,8 @@ class GamesServicesControllerImpl extends AbstractGameService {
 
     // Retrieve achievement status from SharedPreferences
     await _initPrefs();
-    bool iOSSuccess = _prefs?.getBool('$iOS-achievement') ?? false;
-    bool androidSuccess = _prefs?.getBool('$android-achievement') ?? false;
+    bool iOSSuccess = _prefs?.getBool('$_iOS-achievement') ?? false;
+    bool androidSuccess = _prefs?.getBool('$_android-achievement') ?? false;
 
     if (iOSSuccess || androidSuccess) {
       _log.info('Show achievements UI');
@@ -72,6 +77,7 @@ class GamesServicesControllerImpl extends AbstractGameService {
   // Implement other methods similarly...
 
   // Add fake leaderboards
+  @override
   Future<void> showLeaderboard() async {
     if (!await signedIn) {
       _log.severe('Trying to show leaderboard when not logged in.');
@@ -81,6 +87,7 @@ class GamesServicesControllerImpl extends AbstractGameService {
     _log.info('Show leaderboards UI');
   }
 
+  @override
   Future<void> submitLeaderboardScore(Score score) async {
     if (!await signedIn) {
       _log.warning('Trying to submit leaderboard when not logged in.');

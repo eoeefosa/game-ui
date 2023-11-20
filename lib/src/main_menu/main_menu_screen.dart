@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:simplegame/src/audio/audio_controller.dart';
 import 'package:simplegame/src/audio/sounds.dart';
+import 'package:simplegame/src/games_services/game_services_controller.dart';
 import 'package:simplegame/src/level_selection/level_selection_screen.dart';
 import 'package:simplegame/src/settings/settings.dart';
 import 'package:simplegame/src/settings/settings_screen.dart';
@@ -19,6 +20,7 @@ class MainMenuScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final pallete = context.watch<Palette>();
     // TODO: INITALISE gameservicecontroller
+    final gameServiceController = context.watch<GameServicesController?>();
     final settingsController = context.watch<SettingsController>();
     final audioController = context.watch<AudioController>();
     return Scaffold(
@@ -50,8 +52,24 @@ class MainMenuScreen extends StatelessWidget {
             ),
             _gap,
             // TODO: ACHIEVEMNETS,AND LEADERBOARD
-
-            // _gap,
+            if (gameServiceController != null) ...[
+              _hideUntilReady(
+                ready: gameServiceController.signedIn,
+                child: ElevatedButton(
+                  onPressed: () => gameServiceController.showAchievement(),
+                  child: const Text('Achievements'),
+                ),
+              ),
+              _gap,
+              _hideUntilReady(
+                ready: gameServiceController.signedIn,
+                child: ElevatedButton(
+                  onPressed: () => gameServiceController.showLeaderboard(),
+                  child: const Text('Leaderboard'),
+                ),
+              ),
+            ],
+            _gap,
             ElevatedButton(
               onPressed: () => GoRouter.of(context).go(SettingsScreen.route),
               child: const Text('Settings'),
@@ -78,7 +96,7 @@ class MainMenuScreen extends StatelessWidget {
     );
   }
 
-  Widget _hideUntilReady({required Widget child, required Future<bool> ready}) {
+  Widget _hideUntilReady({required Future<bool> ready, required Widget child}) {
     return FutureBuilder<bool>(
         future: ready,
         builder: (context, snapshot) {
