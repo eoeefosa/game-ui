@@ -9,7 +9,11 @@ import '../player_progress/player_progress.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
+
+  /// for pages
   static const route = '/settings';
+
+  /// for gorouter
   static const routename = 'settings';
 
   static const _gap = SizedBox(height: 60);

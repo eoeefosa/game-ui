@@ -13,6 +13,8 @@ import 'package:simplegame/src/style/responsive_screen.dart';
 
 class MainMenuScreen extends StatelessWidget {
   const MainMenuScreen({super.key});
+
+  /// static const route = '/';
   static const route = '/';
   static const _gap = SizedBox(height: 10);
 

@@ -9,6 +9,8 @@ class PlayerProgress extends ChangeNotifier {
   int _highestLevelReached = 0;
 
   PlayerProgress(PlayerProgressPersistence store) : _store = store;
+  
+  int get highestLevelReached => _highestLevelReached;
 
   Future<void> getLatestFromStore() async {
     final level = await _store.getHighestLevelReached();

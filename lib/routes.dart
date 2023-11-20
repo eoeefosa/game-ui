@@ -5,6 +5,7 @@ import 'package:simplegame/src/games_services/score.dart';
 import 'package:simplegame/src/level_selection/game_levels.dart';
 import 'package:simplegame/src/level_selection/level_selection_screen.dart';
 import 'package:simplegame/src/main_menu/main_menu_screen.dart';
+import 'package:simplegame/src/play_session/play_session_screen.dart';
 import 'package:simplegame/src/settings/settings_screen.dart';
 import 'package:simplegame/src/style/my_transition.dart';
 import 'package:simplegame/src/style/palette.dart';
@@ -29,7 +30,7 @@ class AppRoutes {
                     ),
                 routes: [
                   GoRoute(
-                    path: 'session/level:level',
+                    path: 'session/:level',
                     pageBuilder: (context, state) {
                       final levelNumber =
                           int.parse(state.pathParameters['level']!);
@@ -37,7 +38,10 @@ class AppRoutes {
                           (gamelevel) => gamelevel.number == levelNumber);
                       // TODO REPLACE WITH PLAYSESSION
                       return buildMyTransition(
-                        child: Container(),
+                        child: PlaySessionScreen(
+                          level: level,
+                          key: const Key('play sesion'),
+                        ),
                         color: context.watch<Palette>().backgroundPlaySession,
                       );
                     },
