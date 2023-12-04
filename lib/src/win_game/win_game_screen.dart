@@ -9,9 +9,13 @@ import 'package:simplegame/src/style/responsive_screen.dart';
 class WinGameScreen extends StatelessWidget {
   const WinGameScreen({
     super.key,
-    required this.score,
+    // required this.score,
+    this.score,
+    this.scorenumber,
   });
-  final Score score;
+  // final Score score;
+  final Score? score;
+  final int? scorenumber;
   static const route = '/play/won';
   static const routename = 'won';
 
@@ -41,8 +45,8 @@ class WinGameScreen extends StatelessWidget {
             gap,
             Center(
               child: Text(
-                'Score: ${score.score}\n'
-                'Time: ${score.formattedTime}',
+                'Score: ${score == null ? scorenumber : score!.score}\n'
+                'Time: ${score == null ? scorenumber : score!.formattedTime}',
                 style: const TextStyle(
                     fontFamily: AppConstants.fontfamilypermenent, fontSize: 20),
               ),

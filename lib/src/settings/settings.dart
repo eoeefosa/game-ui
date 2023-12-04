@@ -6,7 +6,7 @@ class SettingsController {
   ValueNotifier<bool> muted = ValueNotifier(false);
   ValueNotifier<String> playerName = ValueNotifier('New Player');
   ValueNotifier<bool> soundsOn = ValueNotifier(false);
-  ValueNotifier<bool> musicOn = ValueNotifier(false);
+  ValueNotifier<bool> musicOn = ValueNotifier(false);  
 
   /// Creates a new instance of [SettingsController] backed by [persistence].
   SettingsController({required SettingsPersistence persistence})

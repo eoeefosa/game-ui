@@ -53,7 +53,15 @@ class LevelSelectionScreen extends StatelessWidget {
                     // TODO: ADD TEXT STYLE
                     leading: Text(level.number.toString()),
                     title: Text('Level #${level.number}'),
-                  )
+                  ),
+                ListTile(
+                  onTap: () {
+                    final audioController = context.read<AudioController>();
+                    audioController.playSfx(SfxType.buttonTap);
+                    GoRouter.of(context).go('/play/quiz_game');
+                  },
+                  title: const Text('Quiz game'),
+                )
               ]))
             ],
           ),

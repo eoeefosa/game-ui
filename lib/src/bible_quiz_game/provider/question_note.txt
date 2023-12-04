@@ -1,0 +1,12 @@
+Questions functions
+  bool isFinish 
+  Question get currentQuestion
+  List<Question> questions 
+  List<AnswerCardStatus> get answersStatus
+  bool get isChoseOption
+  void changeRating(int rating, int level) 
+  void chooseLevel(int level) 
+  void updateCurrentLevelRating()
+  void reset()
+  void chooseAnswer(int index) 
+  void nextQuestion()

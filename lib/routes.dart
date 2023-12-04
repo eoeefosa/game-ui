@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:simplegame/src/bible_quiz_game/view/quiz_screen.dart';
 import 'package:simplegame/src/games_services/score.dart';
 import 'package:simplegame/src/level_selection/game_levels.dart';
 import 'package:simplegame/src/level_selection/level_selection_screen.dart';
@@ -46,6 +47,26 @@ class AppRoutes {
                       );
                     },
                   ),
+                  GoRoute(
+                      path: 'quiz_game',
+                      pageBuilder: (context, state) => buildMyTransition(
+                            child: const QuizScreen(),
+                            color:
+                                context.watch<Palette>().backgroundPlaySession,
+                          )),
+                  GoRoute(
+                      path: 'won_quiz',
+                      pageBuilder: (context, state) {
+                        final map = state.extra! as Map<String, dynamic>;
+                        final score = map['score'] as int;
+                        return buildMyTransition(
+                          child: WinGameScreen(
+                            scorenumber: score,
+                            key: const Key('win game'),
+                          ),
+                          color: context.watch<Palette>().backgroundPlaySession,
+                        );
+                      }),
                   GoRoute(
                       path: 'won',
                       pageBuilder: (context, state) {
